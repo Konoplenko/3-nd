@@ -11,7 +11,7 @@
         </ul>
         <div class="add-form">
             <input type="text" class="add-form-name" placeholder="Введите ваше имя" />
-            <textarea type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4"></textarea>
+            <textarea type="textarea" class="add-form-text" placeholder="Введите ваш комментарий" rows="4"></textarea>
             <div class="add-form-row">
                 <button class="add-form-button">Написать</button>
             </div>
@@ -41,15 +41,23 @@
             }
         ];
 
+        function escapeHtml(unsafe) {
+            return unsafe.replaceAll('&', '&amp;')
+                         .replaceAll('<', '&lt;')
+                         .replaceAll('>', '&gt;')
+                         .replaceAll('"', '&quot;')
+                         .replaceAll("'", '&#039;');
+        }
+
         function renderComments() {
             commentsList.innerHTML = comments.map(comment => `
                 <li class="comment">
                     <div class="comment-header">
-                        <div>${comment.name}</div>
+                        <div>${escapeHtml(comment.name)}</div>
                         <div>${comment.date}</div>
                     </div>
                     <div class="comment-body">
-                        <div class="comment-text">${comment.text}</div>
+                        <div class="comment-text">${escapeHtml(comment.text)}</div>
                     </div>
                     <div class="comment-footer">
                         <div class="likes">
@@ -77,7 +85,7 @@
 
             if (name && text) {
                 comments.push({
-                    name: name,
+                    name: escapeHtml(name),
                     date: getCurrentDateTime(),
                     text: text,
                     likes: 0,
@@ -97,6 +105,10 @@
                 comments[index].isLiked = !comments[index].isLiked;
                 comments[index].likes += comments[index].isLiked ? 1 : -1;
                 renderComments();
+            } else if (e.target.closest('.comment')) {
+                const comment = comments[Array.from(commentsList.children).indexOf(e.target.closest('.comment'))];
+                nameInput.value = comment.name;
+                textInput.value = `> ${comment.text}\n\n`; 
             }
         });
 
